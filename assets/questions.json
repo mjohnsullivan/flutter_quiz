@@ -1,0 +1,10 @@
+[
+    {
+        "question": "Is Dart 2 strongly typed?",
+        "answer": true
+    },
+    {
+        "question": "Can you store state in a StatelessWidget?",
+        "answer": false
+    }
+]
