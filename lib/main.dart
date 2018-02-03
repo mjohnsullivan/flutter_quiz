@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert' show JSON;
+import 'dart:async' show Future;
 
 import 'package:flutter/material.dart';
 // import 'package:flutter_driver/driver_extension.dart';
@@ -18,35 +19,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Flutter Quiz',
       theme: new ThemeData(
         primarySwatch: Colors.blue,
       ),
       home: new Scaffold(
-        body: new QuizPage(),
-      ),
-    );
-  }
-}
-
-class QuizPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return new Padding(
-      padding: new EdgeInsets.only(
-        top: 20.0,
-        left: 20.0,
-        right: 20.0,
-      ),
-      child: new Score(
-        key: new GlobalKey(),
-        child: new Column(
-          children: [
-            new ScoreTile(),
-            new Expanded(
-              child: new Questions(),
-            ),
-          ],
+        body: new Padding(
+          padding: new EdgeInsets.only(top: 20.0,),
+          child: new QuizPage(),
         ),
       ),
     );
@@ -54,74 +34,17 @@ class QuizPage extends StatelessWidget {
 }
 
 /// See https://stackoverflow.com/questions/43778488/force-flutter-to-redraw-all-widgets
-class Score extends StatefulWidget {
-  Score({Key key, this.child}) :
-    super(key: key);
-  
-  final Widget child;
+class QuizPage extends StatefulWidget {
+  QuizPage() : super(key: new GlobalKey());
 
   @override
-  createState() => new ScoreState(child);
+  createState() => new QuizPageState();
 }
 
-class ScoreState extends State<Score> {
-  ScoreState(this.child);
-
-  final Widget child;
+class QuizPageState extends State<QuizPage> {
   int score = 0;
-
-  void incrementScore() => setState(() => score++);
-
-  void decrementScore() => setState(() => score--);
-
-  @override
-  Widget build(BuildContext context) {
-    return new InheritedScore(stateKey: widget.key, score: score, child: child);
-  }
-}
-
-class InheritedScore extends InheritedWidget {
-  const InheritedScore({
-    Key key,
-    @required this.stateKey,
-    @required this.score,
-    @required Widget child,
-  }) : assert(score != null),
-       assert(stateKey != null),
-       assert(child != null),
-      super(key: key, child: child);
-
-  final GlobalKey stateKey;
-  final int score;
-
-  @override
-  bool updateShouldNotify(InheritedScore old) => score != old.score;
-
-  static InheritedScore of(BuildContext context) {
-    return context.inheritFromWidgetOfExactType(InheritedScore);
-  }
-}
-
-class ScoreTile extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    int score = InheritedScore.of(context).score;
-    return new Text(
-      'Score: $score',
-      style: Theme.of(context).textTheme.display1,
-    );
-  }
-}
-
-class Questions extends StatefulWidget {
-  @override
-  createState() => new QuestionsState();
-}
-
-class QuestionsState extends State<Questions> {
   var questions = <Question>[];
 
-  @override
   initState() {
     super.initState();
     loadQuestions();
@@ -135,62 +58,118 @@ class QuestionsState extends State<Questions> {
     );
   }
 
+  void incrementScore() => setState(() => ++score);
+  void decrementScore() => setState(() => --score);
+  void resetGame() => setState(() {
+    score = 0;
+    loadQuestions();
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return  new Column(
+      children: [
+        new Score(score),
+        new Expanded(
+          child: new Questions(questions, answerQuestion),
+        ),
+      ],
+    );
+  }
+
+  answerQuestion(Question question, bool answer) async {
+    question.answer == answer ?
+      incrementScore() :
+      decrementScore();
+
+    questions.remove(question);
+    // If there are no more questions, game over
+    if (questions.length == 0) {
+      await _gameOverDialog();
+      resetGame();
+    }
+  }
+
+  Future<Null> _gameOverDialog() async {
+    return showDialog<Null>(
+      context: context,
+      child: new AlertDialog(
+        title: new Text('Game Over!'),
+        content: new Text('You scored $score'),
+        actions: <Widget>[
+          new FlatButton(
+            child: new Text('Play Again'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class Score extends StatelessWidget {
+  Score(this.score);
+  final int score;
+
+  @override
+  Widget build(BuildContext context) {
+    return new Text(
+      'Score: $score',
+      style: Theme.of(context).textTheme.display1,
+    );
+  }
+}
+
+class Questions extends StatelessWidget {
+  Questions(this.questions, this.answerQuestion);
+  final List<Question> questions;
+  final Function(Question, bool) answerQuestion;
+
   @override
   Widget build(BuildContext context) {
     return new ListView(
       children: questions.map((question) =>
-        new Padding(
-          padding: new EdgeInsets.only(top: 10.0, bottom: 10.0,),
-          child: new Dismissible(
-            key: new Key(question.question),
-            child: new QuestionTile(question),
-            background: new Container(
-              color: Colors.green,
-              child: new Padding(
-                padding: new EdgeInsets.only(left: 20.0),
-                child: new Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    new Icon(
-                      Icons.check,
-                      size: 50.0,
-                    ),
-                  ],
-                ),
+        new Dismissible(
+          key: new Key(question.question),
+          child: new QuestionTile(question),
+          background: new Container(
+            color: Colors.green,
+            child: new Padding(
+              padding: new EdgeInsets.only(left: 20.0),
+              child: new Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  new Icon(
+                    Icons.check,
+                    size: 50.0,
+                  ),
+                ],
               ),
             ),
-            secondaryBackground: new Container(
-              color: Colors.red,
-              child: new Padding(
-                padding: new EdgeInsets.only(right: 20.0),
-                child: new Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    new Icon(
-                      Icons.clear,
-                      size: 50.0,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            onDismissed: (direction) => direction == DismissDirection.startToEnd
-              ? questionAnswered(question, true)
-              : questionAnswered(question, false),
           ),
-        )
+          secondaryBackground: new Container(
+            color: Colors.red,
+            child: new Padding(
+              padding: new EdgeInsets.only(right: 20.0),
+              child: new Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  new Icon(
+                    Icons.clear,
+                    size: 50.0,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          onDismissed: (direction) => direction == DismissDirection.startToEnd
+            ? answerQuestion(question, true)
+            : answerQuestion(question, false),
+        ),
       ).toList(),
     );
-  }
-
-  void questionAnswered(Question question, bool answer) {
-    questions.remove(question);
-    GlobalKey stateKey = InheritedScore.of(context).stateKey;
-    if (question.answer == answer) {
-      (stateKey.currentState as ScoreState).incrementScore();
-    } else {
-      (stateKey.currentState as ScoreState).decrementScore();
-    }
   }
 }
 
