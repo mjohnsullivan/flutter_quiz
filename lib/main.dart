@@ -6,16 +6,13 @@ import 'dart:convert' show JSON;
 import 'dart:async' show Future;
 
 import 'package:flutter/material.dart';
-// import 'package:flutter_driver/driver_extension.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
 void main() {
-  // enableFlutterDriverExtension();
   runApp(new MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
@@ -25,7 +22,7 @@ class MyApp extends StatelessWidget {
       ),
       home: new Scaffold(
         body: new Padding(
-          padding: new EdgeInsets.only(top: 20.0,),
+          padding: new EdgeInsets.only(top: 25.0,),
           child: new QuizPage(),
         ),
       ),
@@ -33,7 +30,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-/// See https://stackoverflow.com/questions/43778488/force-flutter-to-redraw-all-widgets
 class QuizPage extends StatefulWidget {
   QuizPage() : super(key: new GlobalKey());
 
@@ -42,11 +38,13 @@ class QuizPage extends StatefulWidget {
 }
 
 class QuizPageState extends State<QuizPage> {
-  int score = 0;
-  var questions = <Question>[];
+  int score;
+  List<Question> questions;
 
   initState() {
     super.initState();
+    score = 0;
+    questions = <Question>[];
     loadQuestions();
   }
 
@@ -94,7 +92,7 @@ class QuizPageState extends State<QuizPage> {
     return showDialog<Null>(
       context: context,
       child: new AlertDialog(
-        title: new Text('Game Over!'),
+        title: new Text('Game Over'),
         content: new Text('You scored $score'),
         actions: <Widget>[
           new FlatButton(
@@ -144,6 +142,7 @@ class Questions extends StatelessWidget {
                   new Icon(
                     Icons.check,
                     size: 50.0,
+                    color: Theme.of(context).canvasColor,
                   ),
                 ],
               ),
@@ -159,6 +158,7 @@ class Questions extends StatelessWidget {
                   new Icon(
                     Icons.clear,
                     size: 50.0,
+                    color: Theme.of(context).canvasColor,
                   ),
                 ],
               ),
@@ -173,7 +173,6 @@ class Questions extends StatelessWidget {
   }
 }
 
-/// Tile that displays a question
 class QuestionTile extends StatelessWidget {
   QuestionTile(this.question);
   final Question question;
