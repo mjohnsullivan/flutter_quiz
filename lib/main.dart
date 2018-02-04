@@ -41,14 +41,15 @@ class QuizPageState extends State<QuizPage> {
   int score;
   List<Question> questions;
 
+  @override
   initState() {
     super.initState();
     score = 0;
     questions = <Question>[];
-    loadQuestions();
+    _loadQuestions();
   }
 
-  loadQuestions() async {
+  _loadQuestions() async {
     var jsonString = await rootBundle.loadString('assets/questions.json');
     var questionList = JSON.decode(jsonString);
     setState(() =>
@@ -60,26 +61,13 @@ class QuizPageState extends State<QuizPage> {
   void decrementScore() => setState(() => --score);
   void resetGame() => setState(() {
     score = 0;
-    loadQuestions();
+    _loadQuestions();
   });
-
-  @override
-  Widget build(BuildContext context) {
-    return  new Column(
-      children: [
-        new Score(score),
-        new Expanded(
-          child: new Questions(questions, answerQuestion),
-        ),
-      ],
-    );
-  }
 
   answerQuestion(Question question, bool answer) async {
     question.answer == answer ?
       incrementScore() :
       decrementScore();
-
     questions.remove(question);
     // If there are no more questions, game over
     if (questions.length == 0) {
@@ -105,6 +93,18 @@ class QuizPageState extends State<QuizPage> {
       ),
     );
   }
+
+  @override
+  Widget build(BuildContext context) {
+    return  new Column(
+      children: [
+        new Score(score),
+        new Expanded(
+          child: new Questions(questions, answerQuestion),
+        ),
+      ],
+    );
+  }
 }
 
 class Score extends StatelessWidget {
@@ -128,63 +128,56 @@ class Questions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new ListView(
-      children: questions.map((question) =>
-        new Dismissible(
-          key: new Key(question.question),
-          child: new QuestionTile(question),
-          background: new Container(
-            color: Colors.green,
-            child: new Padding(
-              padding: new EdgeInsets.only(left: 20.0),
-              child: new Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  new Icon(
-                    Icons.check,
-                    size: 50.0,
-                    color: Theme.of(context).canvasColor,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          secondaryBackground: new Container(
-            color: Colors.red,
-            child: new Padding(
-              padding: new EdgeInsets.only(right: 20.0),
-              child: new Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  new Icon(
-                    Icons.clear,
-                    size: 50.0,
-                    color: Theme.of(context).canvasColor,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          onDismissed: (direction) => direction == DismissDirection.startToEnd
-            ? answerQuestion(question, true)
-            : answerQuestion(question, false),
-        ),
-      ).toList(),
+      children: questions.map((q) =>
+        new QuestionTile(q, answerQuestion)).toList()
     );
   }
 }
 
 class QuestionTile extends StatelessWidget {
-  QuestionTile(this.question);
+  QuestionTile(this.question, this.answerQuestion);
   final Question question;
+  final Function(Question, bool) answerQuestion;
 
-  @override
   Widget build(BuildContext context) {
-    return new ListTile(
-      leading: new CircleAvatar(
-        child: new Text('Q'),
+    return new Card(
+      child: new Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          new Expanded(
+              child: new Text(
+                question.question,
+                style: new TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+          ),
+          new GestureDetector(
+            child: new Container(
+              padding: new EdgeInsets.all(20.0),
+              color: Colors.green,
+              child: new Icon(
+                Icons.check,
+                color: Theme.of(context).canvasColor,
+              ),
+            ),
+            onTap: () => answerQuestion(question, true),
+          ),
+          new GestureDetector(
+            child: new Container(
+              padding: new EdgeInsets.all(20.0),
+              color: Colors.red,
+              child: new Icon(
+                Icons.clear,
+                color: Theme.of(context).canvasColor,
+              ),
+            ),
+            onTap: () => answerQuestion(question, false),
+          ),
+        ]
       ),
-      title: new Text(question.question),
-      subtitle: new Text('Swipe right for true, left for false'),
     );
   }
 }
