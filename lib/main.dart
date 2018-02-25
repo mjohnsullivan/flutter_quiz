@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert' show JSON;
-import 'dart:async' show Future;
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
+
+import 'questions.dart';
 
 void main() {
   runApp(new QuizApp());
@@ -39,54 +37,41 @@ class QuizPageState extends State<QuizPage> {
   int score;
   List<Question> questions;
 
+  @override
   initState() {
     super.initState();
     score = 0;
     questions = <Question>[];
-    loadQuestions();
+    _loadQuestions();
   }
 
-  loadQuestions() async {
-    var jsonString = await rootBundle.loadString('assets/questions.json');
-    var questionList = JSON.decode(jsonString);
-    setState(() =>
-      questions = questionList.map((q) => new Question.fromJson(q)).toList()
-    );
+  _loadQuestions() async {
+    final loadedQuestions = await loadQuestionsLocally();
+    setState(() => questions = loadedQuestions);
   }
 
-  void incrementScore() => setState(() => ++score);
-  void decrementScore() => setState(() => --score);
-  void resetGame() => setState(() {
+  _incrementScore() => setState(() => ++score);
+
+  _decrementScore() => setState(() => --score);
+
+  _resetGame() => setState(() {
     score = 0;
-    loadQuestions();
+    _loadQuestions();
   });
 
-  @override
-  Widget build(BuildContext context) {
-    return  new Column(
-      children: [
-        new Score(score),
-        new Expanded(
-          child: new Questions(questions, answerQuestion),
-        ),
-      ],
-    );
-  }
-
-  answerQuestion(Question question, bool answer) async {
+  _answerQuestion(Question question, bool answer) async {
     question.answer == answer ?
-      incrementScore() :
-      decrementScore();
+      _incrementScore() :
+      _decrementScore();
 
     questions.remove(question);
-    // If there are no more questions, game over
     if (questions.length == 0) {
       await _gameOverDialog();
-      resetGame();
+      _resetGame();
     }
   }
 
-  Future<Null> _gameOverDialog() async {
+  _gameOverDialog() async {
     return showDialog<Null>(
       context: context,
       child: new AlertDialog(
@@ -101,6 +86,18 @@ class QuizPageState extends State<QuizPage> {
           ),
         ],
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new Column(
+      children: [
+        new Score(score),
+        new Expanded(
+          child: new QuestionsDissmissible(questions, _answerQuestion),
+        ),
+      ],
     );
   }
 }
@@ -118,8 +115,8 @@ class Score extends StatelessWidget {
   }
 }
 
-class Questions extends StatelessWidget {
-  Questions(this.questions, this.answerQuestion);
+class QuestionsDissmissible extends StatelessWidget {
+  QuestionsDissmissible(this.questions, this.answerQuestion);
   final List<Question> questions;
   final Function(Question, bool) answerQuestion;
 
@@ -185,14 +182,4 @@ class QuestionTile extends StatelessWidget {
       subtitle: new Text('Swipe right for true, left for false'),
     );
   }
-}
-
-/// PODO for questions
-class Question {
-  String question;
-  bool answer;
-
-  Question.fromJson(Map jsonMap) :
-    question = jsonMap['question'],
-    answer = jsonMap['answer'];
 }
