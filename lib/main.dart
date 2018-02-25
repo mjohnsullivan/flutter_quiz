@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 
 import 'questions.dart';
+import 'questions_dissmissible.dart';
+import 'questions_buttons.dart';
 
 void main() {
   runApp(new QuizApp());
@@ -13,20 +15,28 @@ void main() {
 class QuizApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final quizPage = new QuizPage();
+
     return new MaterialApp(
       title: 'Flutter Quiz',
       theme: new ThemeData(
+        primaryColor: Colors.white,
         primarySwatch: Colors.blue,
       ),
       home: new Scaffold(
+        appBar: new AppBar(
+          title: new Text('Flutter Quiz'),
+        ),
         body: new Padding(
           padding: new EdgeInsets.only(top: 25.0,),
-          child: new QuizPage(),
+          child: quizPage,
         ),
       ),
     );
   }
 }
+
+enum QuestionView { buttons, dissmissible }
 
 class QuizPage extends StatefulWidget {
   @override
@@ -36,12 +46,14 @@ class QuizPage extends StatefulWidget {
 class QuizPageState extends State<QuizPage> {
   int score;
   List<Question> questions;
+  QuestionView questionView;
 
   @override
   initState() {
     super.initState();
     score = 0;
     questions = <Question>[];
+    questionView = QuestionView.dissmissible;
     _loadQuestions();
   }
 
@@ -89,13 +101,31 @@ class QuizPageState extends State<QuizPage> {
     );
   }
 
+  /// Change between the different question views
+  changeQuestionsView() {
+    setState(() => 
+    questionView = QuestionView.values[
+      (questionView.index + 1) % QuestionView.values.length]
+    );
+    print(questionView);
+  }
+
   @override
   Widget build(BuildContext context) {
+    Widget questionWidget;
+    switch(questionView) {
+      case QuestionView.dissmissible:
+        questionWidget = new QuestionsDissmissible(questions, _answerQuestion);
+        break;
+      case QuestionView.buttons:
+        questionWidget = new QuestionsButtons(questions, _answerQuestion);
+        break;
+    }
     return new Column(
       children: [
-        new Score(score),
+        new Score(score, changeQuestionsView),
         new Expanded(
-          child: new QuestionsDissmissible(questions, _answerQuestion),
+          child: questionWidget,
         ),
       ],
     );
@@ -103,83 +133,27 @@ class QuizPageState extends State<QuizPage> {
 }
 
 class Score extends StatelessWidget {
-  Score(this.score);
+  Score(this.score, this.changeQuestionView);
   final int score;
+  final Function changeQuestionView;
 
   @override
   Widget build(BuildContext context) {
-    return new Text(
-      'Score: $score',
-      style: Theme.of(context).textTheme.display1,
-    );
-  }
-}
-
-class QuestionsDissmissible extends StatelessWidget {
-  QuestionsDissmissible(this.questions, this.answerQuestion);
-  final List<Question> questions;
-  final Function(Question, bool) answerQuestion;
-
-  @override
-  Widget build(BuildContext context) {
-    return new ListView(
-      children: questions.map((question) =>
-        new Dismissible(
-          key: new Key(question.question),
-          child: new QuestionTile(question),
-          background: new Container(
-            color: Colors.green,
-            child: new Padding(
-              padding: new EdgeInsets.only(left: 20.0),
-              child: new Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  new Icon(
-                    Icons.check,
-                    size: 50.0,
-                    color: Theme.of(context).canvasColor,
-                  ),
-                ],
-              ),
+    return new Row(
+      children: <Widget>[
+        new Expanded(
+          child: new Center(
+            child: new Text(
+              'Score: $score',
+              style: Theme.of(context).textTheme.display1,
             ),
           ),
-          secondaryBackground: new Container(
-            color: Colors.red,
-            child: new Padding(
-              padding: new EdgeInsets.only(right: 20.0),
-              child: new Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  new Icon(
-                    Icons.clear,
-                    size: 50.0,
-                    color: Theme.of(context).canvasColor,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          onDismissed: (direction) => direction == DismissDirection.startToEnd
-            ? answerQuestion(question, true)
-            : answerQuestion(question, false),
         ),
-      ).toList(),
-    );
-  }
-}
-
-class QuestionTile extends StatelessWidget {
-  QuestionTile(this.question);
-  final Question question;
-
-  @override
-  Widget build(BuildContext context) {
-    return new ListTile(
-      leading: new CircleAvatar(
-        child: new Text('Q'),
-      ),
-      title: new Text(question.question),
-      subtitle: new Text('Swipe right for true, left for false'),
+        new IconButton(
+          icon: new Icon(Icons.list),
+          onPressed: () => changeQuestionView(),
+        ),
+      ],
     );
   }
 }
