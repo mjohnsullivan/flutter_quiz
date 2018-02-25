@@ -9,10 +9,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
 void main() {
-  runApp(new MyApp());
+  runApp(new QuizApp());
 }
 
-class MyApp extends StatelessWidget {
+class QuizApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
@@ -31,8 +31,6 @@ class MyApp extends StatelessWidget {
 }
 
 class QuizPage extends StatefulWidget {
-  QuizPage() : super(key: new GlobalKey());
-
   @override
   createState() => new QuizPageState();
 }
