@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'questions.dart';
 import 'questions_dissmissible.dart';
 import 'questions_buttons.dart';
+import 'questions_pagable.dart';
 
 void main() {
   runApp(new QuizApp());
@@ -36,7 +37,7 @@ class QuizApp extends StatelessWidget {
   }
 }
 
-enum QuestionView { buttons, dissmissible }
+enum QuestionView { buttons, dissmissible, pagable }
 
 class QuizPage extends StatefulWidget {
   @override
@@ -119,6 +120,9 @@ class QuizPageState extends State<QuizPage> {
         break;
       case QuestionView.buttons:
         questionWidget = new QuestionsButtons(questions, _answerQuestion);
+        break;
+      case QuestionView.pagable:
+        questionWidget = new QuestionsPageable(questions, _answerQuestion);
         break;
     }
     return new Column(
