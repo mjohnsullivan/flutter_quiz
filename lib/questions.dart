@@ -21,6 +21,6 @@ Future<List<Question>> loadQuestionsLocally() async {
    final jsonString = await rootBundle.loadString('assets/questions.json');
   final questions = json.decode(jsonString);
   return questions.map(
-        (q) => new Question.fromJson(q)
-      ).toList();
+    (q) => new Question.fromJson(q)
+  ).toList();
 }
