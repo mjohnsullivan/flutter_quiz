@@ -18,7 +18,6 @@ void main() {
 class QuizApp extends StatelessWidget {
   final viewChangeStreamController = new StreamController<Null>();
 
-
   _quizViewChange() {
     viewChangeStreamController.add(null);
   }
@@ -36,7 +35,7 @@ class QuizApp extends StatelessWidget {
           title: new Text('Flutter Quiz'),
           elevation: 0.0,
           actions: [new IconButton(
-            icon: new Icon(Icons.list),
+            icon: new Icon(Icons.navigate_next),
             tooltip: 'Change quiz view',
             onPressed: _quizViewChange,
           )],
@@ -70,8 +69,10 @@ class QuizPageState extends State<QuizPage> {
   @override
   initState() {
     super.initState();
-    _subscribeToViewChanges();
     _loadQuestions();
+    viewChangeSubscription = widget.viewChangeStream.listen(
+      (_) => changeQuestionsView()
+    );
   }
 
   @override
@@ -80,10 +81,6 @@ class QuizPageState extends State<QuizPage> {
     if (widget.viewChangeStream != null) {
       viewChangeSubscription.cancel();
     }
-  }
-
-  _subscribeToViewChanges() {
-    viewChangeSubscription = widget.viewChangeStream.listen((_) => changeQuestionsView());
   }
 
   _loadQuestions() async {
@@ -130,7 +127,6 @@ class QuizPageState extends State<QuizPage> {
     questionView = QuestionView.values[
       (questionView.index + 1) % QuestionView.values.length]
     );
-    print(questionView);
   }
 
   @override

@@ -25,6 +25,7 @@ class QuestionsPageable extends StatelessWidget {
       pageSnapping: true,
       children: questionPages,
       onPageChanged: (i) => print('Page changed to $i'),
+      
     );
   }
 }
@@ -45,13 +46,20 @@ class QuestionPage extends StatelessWidget {
             textAlign: TextAlign.center,
             style: new TextStyle(fontSize: 30.0),
           ),
-          new FlatButton(
-            child: new Text('True'),
-            onPressed: () => answerQuestion(question, true),
-          ),
-          new FlatButton(
-            child: new Text('False'),
-            onPressed: () => answerQuestion(question, false),
+          new Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              new FlatButton(
+                child: new Text('TRUE'),
+                splashColor: Colors.blue,
+                onPressed: () => answerQuestion(question, true),
+              ),
+              new FlatButton(
+                child: new Text('FALSE'),
+                splashColor: Colors.blue,
+                onPressed: () => answerQuestion(question, false),
+              ),
+            ],
           ),
         ],
       ),
