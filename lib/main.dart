@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'questions.dart';
@@ -9,20 +11,20 @@ import 'questions_dissmissible.dart';
 import 'questions_buttons.dart';
 import 'questions_pagable.dart';
 
-import 'talk/2_quiz_app_skeleton.dart';
-import 'talk/3_quiz_app_list_tiles.dart';
-import 'talk/4_quiz_app_logic.dart';
-import 'talk/5_quiz_app_paging.dart';
-
 void main() {
   runApp(new QuizApp());
 }
 
 class QuizApp extends StatelessWidget {
+  final viewChangeStreamController = new StreamController<Null>();
+
+
+  _quizViewChange() {
+    viewChangeStreamController.add(null);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final quizPage = new QuizPage();
-
     return new MaterialApp(
       title: 'Flutter Quiz',
       theme: new ThemeData(
@@ -32,11 +34,18 @@ class QuizApp extends StatelessWidget {
       home: new Scaffold(
         appBar: new AppBar(
           title: new Text('Flutter Quiz'),
+          elevation: 0.0,
+          actions: [new IconButton(
+            icon: new Icon(Icons.list),
+            tooltip: 'Change quiz view',
+            onPressed: _quizViewChange,
+          )],
         ),
         body: new Padding(
-          padding: new EdgeInsets.only(top: 25.0,),
-          child: quizPage,
+          padding: new EdgeInsets.only(top: 5.0,),
+          child: new QuizPage(viewChangeStreamController.stream),
         ),
+        backgroundColor: Colors.white,
       ),
     );
   }
@@ -45,22 +54,36 @@ class QuizApp extends StatelessWidget {
 enum QuestionView { buttons, dissmissible, pagable }
 
 class QuizPage extends StatefulWidget {
+  QuizPage(this.viewChangeStream);
+  final Stream<Null> viewChangeStream;
+
   @override
   createState() => new QuizPageState();
 }
 
 class QuizPageState extends State<QuizPage> {
-  int score;
-  List<Question> questions;
-  QuestionView questionView;
+  var score = 0;
+  var questions = <Question>[];
+  var questionView = QuestionView.dissmissible;
+  StreamSubscription viewChangeSubscription;
 
   @override
   initState() {
     super.initState();
-    score = 0;
-    questions = <Question>[];
-    questionView = QuestionView.dissmissible;
+    _subscribeToViewChanges();
     _loadQuestions();
+  }
+
+  @override
+  dispose() {
+    super.dispose();
+    if (widget.viewChangeStream != null) {
+      viewChangeSubscription.cancel();
+    }
+  }
+
+  _subscribeToViewChanges() {
+    viewChangeSubscription = widget.viewChangeStream.listen((_) => changeQuestionsView());
   }
 
   _loadQuestions() async {
@@ -68,19 +91,13 @@ class QuizPageState extends State<QuizPage> {
     setState(() => questions = loadedQuestions);
   }
 
-  _incrementScore() => setState(() => ++score);
-
-  _decrementScore() => setState(() => --score);
-
   _resetGame() => setState(() {
     score = 0;
     _loadQuestions();
   });
 
   _answerQuestion(Question question, bool answer) async {
-    question.answer == answer ?
-      _incrementScore() :
-      _decrementScore();
+    setState(() => question.answer == answer ? score++ : score--);
 
     questions.remove(question);
     if (questions.length == 0) {
@@ -132,7 +149,7 @@ class QuizPageState extends State<QuizPage> {
     }
     return new Column(
       children: [
-        new Score(score, changeQuestionsView),
+        new Score(score),
         new Expanded(
           child: questionWidget,
         ),
@@ -142,27 +159,16 @@ class QuizPageState extends State<QuizPage> {
 }
 
 class Score extends StatelessWidget {
-  Score(this.score, this.changeQuestionView);
+  Score(this.score);
   final int score;
-  final Function changeQuestionView;
 
   @override
   Widget build(BuildContext context) {
-    return new Row(
-      children: <Widget>[
-        new Expanded(
-          child: new Center(
-            child: new Text(
-              'Score: $score',
-              style: Theme.of(context).textTheme.display1,
-            ),
-          ),
-        ),
-        new IconButton(
-          icon: new Icon(Icons.list),
-          onPressed: changeQuestionView,
-        ),
-      ],
+    return new Center(
+      child: new Text(
+        'Score: $score',
+        style: Theme.of(context).textTheme.display1,
+      ),
     );
   }
 }

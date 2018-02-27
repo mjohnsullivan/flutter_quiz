@@ -13,57 +13,36 @@ class QuestionsButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new ListView(
-      children: questions.map((q) =>
-        new QuestionButtonsTile(q, answerQuestion)).toList()
-    );
-  }
-}
+    final listTiles = questions.map((question) {
 
-class QuestionButtonsTile extends StatelessWidget {
-  QuestionButtonsTile(this.question, this.answerQuestion);
-  final Question question;
-  final Function(Question, bool) answerQuestion;
-
-  Widget build(BuildContext context) {
-    return new Card(
-      child: new Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
+      final controls = new Row(
         children: [
-          new Expanded(
-              child: new Text(
-                question.question,
-                style: new TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-          ),
           new GestureDetector(
-            child: new Container(
-              padding: new EdgeInsets.all(20.0),
-              color: Colors.green,
-              child: new Icon(
-                Icons.check,
-                color: Theme.of(context).canvasColor,
-              ),
-            ),
+            child: new Icon(Icons.check, size: 30.0),
             onTap: () => answerQuestion(question, true),
           ),
-          new GestureDetector(
-            child: new Container(
-              padding: new EdgeInsets.all(20.0),
-              color: Colors.red,
-              child: new Icon(
-                Icons.clear,
-                color: Theme.of(context).canvasColor,
-              ),
+          new Padding(
+            padding: new EdgeInsets.only(left: 10.0),
+            child: new GestureDetector(
+              child: new Icon(Icons.clear, size: 30.0),
+              onTap: () => answerQuestion(question, false),
             ),
-            onTap: () => answerQuestion(question, false),
           ),
-        ]
-      ),
+        ],
+      );
+
+      return new ListTile(
+        leading: new CircleAvatar(
+          child: const Text('Q'),
+          backgroundColor: Colors.blue,
+        ),
+        title: new Text(question.question),
+        trailing: controls,
+      );
+    }).toList();
+
+    return new ListView(
+      children: listTiles
     );
   }
 }
