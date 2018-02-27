@@ -9,6 +9,11 @@ import 'questions_dissmissible.dart';
 import 'questions_buttons.dart';
 import 'questions_pagable.dart';
 
+import 'talk/2_quiz_app_skeleton.dart';
+import 'talk/3_quiz_app_list_tiles.dart';
+import 'talk/4_quiz_app_logic.dart';
+import 'talk/5_quiz_app_paging.dart';
+
 void main() {
   runApp(new QuizApp());
 }
@@ -155,7 +160,7 @@ class Score extends StatelessWidget {
         ),
         new IconButton(
           icon: new Icon(Icons.list),
-          onPressed: () => changeQuestionView(),
+          onPressed: changeQuestionView,
         ),
       ],
     );

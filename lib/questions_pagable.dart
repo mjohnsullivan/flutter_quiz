@@ -13,11 +13,7 @@ class QuestionsPageable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    var controller = new PageController(
-      initialPage: 1,
-      keepPage: true,
-      viewportFraction: 1.0,
-    );
+    var controller = new PageController();
 
     return new PageView(
       controller: controller,
@@ -37,13 +33,13 @@ class QuestionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Container(
-      color: Colors.blue,
       child: new Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           new Text(
             question.question,
-            style: new TextStyle(fontSize: 18.0),
+            textAlign: TextAlign.center,
+            style: new TextStyle(fontSize: 30.0),
           ),
           new FlatButton(
             child: new Text('True'),
@@ -56,7 +52,5 @@ class QuestionPage extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  
+  }  
 }
