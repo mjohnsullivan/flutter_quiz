@@ -68,6 +68,7 @@ class QuestionDissmissibleTile extends StatelessWidget {
     return new ListTile(
       leading: new CircleAvatar(
         child: new Text('Q'),
+        backgroundColor: Colors.blue,
       ),
       title: new Text(question.question),
       subtitle: new Text('Swipe right for true, left for false'),
