@@ -24,7 +24,7 @@ class QuizAppLogic extends StatelessWidget {
 class QuizPage extends StatefulWidget {
   @override
   createState() => new QuizPageState();
-  }
+}
   
 class QuizPageState extends State<QuizPage> {
   var score = 0;

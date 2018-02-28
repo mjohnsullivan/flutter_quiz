@@ -84,7 +84,7 @@ class QuizPageState extends State<QuizPage> {
           style: Theme.of(context).textTheme.display1,
         ),
         new Expanded(
-          child: new PageableQuestions(questions, _answerQuestion),
+          child: new Questions(questions, _answerQuestion),
         ),
       ],
     );
@@ -103,20 +103,27 @@ class PageableQuestions extends Questions {
             child: new Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                new Text(
-                  question.question,
-                  textAlign: TextAlign.center,
-                  style: new TextStyle(fontSize: 30.0),
-                ),
-                new FlatButton(
-                  child: new Text('True'),
-                  onPressed: () => answerQuestion(question, true),
-                ),
-                new FlatButton(
-                  child: new Text('False'),
-                  onPressed: () => answerQuestion(question, false),
-                ),
-              ],
+          new Text(
+            question.question,
+            textAlign: TextAlign.center,
+            style: new TextStyle(fontSize: 30.0),
+          ),
+          new Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              new FlatButton(
+                child: new Text('TRUE'),
+                splashColor: Colors.blue,
+                onPressed: () => answerQuestion(question, true),
+              ),
+              new FlatButton(
+                child: new Text('FALSE'),
+                splashColor: Colors.blue,
+                onPressed: () => answerQuestion(question, false),
+              ),
+            ],
+          ),
+        ],
             ),
           )
         ).toList(),

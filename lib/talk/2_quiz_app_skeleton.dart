@@ -24,7 +24,7 @@ class QuizAppSkeleton extends StatelessWidget {
 class QuizPage extends StatefulWidget {
   @override
   createState() => new QuizPageState();
-  }
+}
   
 class QuizPageState extends State<QuizPage> {
   var score = 0;
@@ -51,7 +51,9 @@ class QuizPageState extends State<QuizPage> {
         ),
         new Expanded(
           child: new ListView(
-            children: questions.map((question) => new Text(question.question)).toList()
+            children: questions.map(
+              (q) => new Text(q.question)
+            ).toList()
           ),
         ),
       ],

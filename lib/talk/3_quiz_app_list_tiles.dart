@@ -63,29 +63,28 @@ class Questions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final listTiles = questions.map((question) {
+      final controls = new Row(
+        children: [
+          new GestureDetector(
+            child: new Icon(Icons.check, size: 30.0),
+            onTap: () => print('true'),
+          ),
+          new IconButton(
+            icon: new Icon(Icons.clear, size: 30.0),
+            onPressed: () => print('false'),
+          ),
+        ]
+      );
 
-    final controls = new Row(
-      children: [
-        new GestureDetector(
-          child: new Icon(Icons.check, size: 30.0),
-          onTap: () => print('true'),
-        ),
-        new GestureDetector(
-          child: new Icon(Icons.clear, size: 30.0),
-          onTap: () => print('false'),
-        ),
-      ]
-    );
-
-    final listTiles = questions.map((question) => 
-      new ListTile(
+      return new ListTile(
         leading: new CircleAvatar(
           child: const Text('Q'),
         ),
         title: new Text(question.question),
         trailing: controls,
-      )
-    ).toList();
+      );
+    }).toList();
 
     final dividedTiles = ListTile.divideTiles(
       context: context,
