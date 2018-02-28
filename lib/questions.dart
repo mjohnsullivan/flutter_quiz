@@ -28,8 +28,8 @@ Future<List<Question>> loadQuestionsLocally() async {
   final jsonString = await rootBundle.loadString('assets/questions.json');
   final questions = json.decode(jsonString);
   return questions.map(
-        (q) => new Question.fromJson(q)
-      ).toList();
+    (q) => new Question.fromJson(q)
+  ).toList();
 }
 
 Future<List<Question>> loadQuestionsNetwork() async {
@@ -44,6 +44,16 @@ Future<List<Question>> loadQuestionsNetwork() async {
   ).toList();
 }
 
+Future<List<Question>> loadQuestionsNetworkWithHttpPackage() async {
+  final res = await http.get(
+    Uri.parse('https://raw.githubusercontent.com/mjohnsullivan/flutter_quiz/master/assets/questions.json')
+  );
+  final questions = json.decode(res.body);
+  return questions.map(
+    (q) => new Question.fromJson(q)
+  ).toList();
+}
+
 Future<Stream<Question>> loadQuestionsNetworkAsStream() async {
   final uri = 'https://raw.githubusercontent.com/mjohnsullivan/flutter_quiz/master/assets/questions.json';
   var client = new http.Client();
@@ -53,6 +63,6 @@ Future<Stream<Question>> loadQuestionsNetworkAsStream() async {
   return streamedRes.stream
     .transform(UTF8.decoder)
     .transform(json.decoder)
-    .expand( (body) => body)
-    .map( (q) => new Question.fromJson(q));
+    .expand((body) => body)
+    .map((q) => new Question.fromJson(q));
 }

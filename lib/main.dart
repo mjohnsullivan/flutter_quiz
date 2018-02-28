@@ -159,12 +159,12 @@ class Score extends StatelessWidget {
   final int score;
 
   @override
-  Widget build(BuildContext context) {
-    return new Center(
+  Widget build(BuildContext context) =>
+    new Center(
       child: new Text(
         'Score: $score',
         style: Theme.of(context).textTheme.display1,
       ),
     );
-  }
+
 }
